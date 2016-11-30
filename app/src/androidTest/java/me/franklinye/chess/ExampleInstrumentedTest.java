@@ -94,8 +94,8 @@ public class ExampleInstrumentedTest {
         final CountDownLatch writeSignal = new CountDownLatch(1);
         ChessGame chessGame = new ChessGame(userOneKey, userTwoKey);
         chessGame.init();
-        chessGame.addMove(new GameMove(ChessPiece.Side.WHITE, "e4"));
-        chessGame.addMove(new GameMove(ChessPiece.Side.BLACK, "e5"));
+        chessGame.addMove(new GameMove(ChessGame.Side.WHITE, "e4"));
+        chessGame.addMove(new GameMove(ChessGame.Side.BLACK, "e5"));
 
         String firstGameKey = combinedChatKey + 1;
         gamesRef.child(firstGameKey).setValue(chessGame).addOnCompleteListener(new OnCompleteListener<Void>() {

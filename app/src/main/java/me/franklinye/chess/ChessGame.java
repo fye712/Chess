@@ -8,10 +8,15 @@ import java.util.List;
  */
 
 public class ChessGame {
+
+    public enum Side {
+        WHITE, BLACK;
+    }
     private ChessBoard board;
     private List<GameMove> moves;
     private String whiteUser;
     private String blackUser;
+    private String winner;
 
     public ChessGame() {
 
@@ -47,4 +52,6 @@ public class ChessGame {
     public String getBlackUser() {
         return blackUser;
     }
+
+    public String getWinner() { return winner; }
 }

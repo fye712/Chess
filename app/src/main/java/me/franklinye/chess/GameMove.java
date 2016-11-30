@@ -5,19 +5,20 @@ package me.franklinye.chess;
  */
 
 public class GameMove {
-    private ChessPiece.Side side;
+
+    private ChessGame.Side side;
     private String move;
 
     public GameMove() {
 
     }
 
-    public GameMove(ChessPiece.Side side, String move) {
+    public GameMove(ChessGame.Side side, String move) {
         this.side = side;
         this.move = move;
     }
 
-    public ChessPiece.Side getSide() {
+    public ChessGame.Side getSide() {
         return side;
     }
 

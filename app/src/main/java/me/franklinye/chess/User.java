@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class User {
     private String name;
+    private String photoUrl;
     private int wins;
     private int losses;
     private int ties;
@@ -20,6 +21,7 @@ public class User {
 
     public User(FirebaseUser user) {
         this.name = user.getDisplayName();
+        this.photoUrl = user.getPhotoUrl().toString();
         wins = 0;
         losses = 0;
         ties = 0;
@@ -29,6 +31,10 @@ public class User {
 
     public String getName() {
         return name;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
     }
 
     public int getWins() {

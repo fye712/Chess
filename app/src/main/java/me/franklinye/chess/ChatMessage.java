@@ -7,7 +7,9 @@ import com.google.firebase.database.IgnoreExtraProperties;
  */
 
 public class ChatMessage {
+
     public String message;
     public String author;
     public String timeStamp;
+
 }
