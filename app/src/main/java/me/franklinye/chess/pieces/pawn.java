@@ -27,6 +27,8 @@ public class Pawn extends ChessPiece {
         } else {
             sideDirection = -1;
         }
+
+        // capturing
         if (dest.getRow() == current.getRow() + sideDirection &&
                 (dest.getCol() == current.getCol() + 1 ||
                         dest.getCol() == current.getCol() - 1)) {
@@ -37,12 +39,18 @@ public class Pawn extends ChessPiece {
             }
         }
 
+        // not capturing
         if (dest.getRow() == current.getRow() + sideDirection && dest.getCol() == current.getCol()) {
             if (board.getPieceAt(dest) == null) {
                 return true;
             } else {
                 return false;
             }
+        }
+
+        // two move
+        if (dest.getCol() == current.getCol() && dest.getRow() == current.getRow() + 2 * sideDirection) {
+            return !isHasMoved();
         }
         return false;
     }

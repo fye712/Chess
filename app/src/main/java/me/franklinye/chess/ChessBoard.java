@@ -1,5 +1,11 @@
 package me.franklinye.chess;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +35,47 @@ public class ChessBoard {
 
     public ChessBoard() {
 
+    }
+
+    public ChessBoard(DataSnapshot firebaseBoard) {
+        spots = new HashMap<>();
+
+        for (DataSnapshot piece : firebaseBoard.child("spots").getChildren()) {
+            boolean hasMoved = piece.child("hasMoved").getValue(boolean.class);
+            ChessGame.Side side = piece.child("side").getValue(ChessGame.Side.class);
+            switch (piece.child("type").getValue(ChessPiece.Type.class)) {
+                case PAWN:
+                    Pawn pawn = new Pawn(side);
+                    pawn.setHasMoved(hasMoved);
+                    spots.put(piece.getKey(), pawn);
+                    break;
+                case KNIGHT:
+                    Knight knight = new Knight(side);
+                    knight.setHasMoved(hasMoved);
+                    spots.put(piece.getKey(), knight);
+                    break;
+                case BISHOP:
+                    Bishop bishop = new Bishop(side);
+                    bishop.setHasMoved(hasMoved);
+                    spots.put(piece.getKey(), bishop);
+                    break;
+                case ROOK:
+                    Rook rook = new Rook(side);
+                    rook.setHasMoved(hasMoved);
+                    spots.put(piece.getKey(), rook);
+                    break;
+                case QUEEN:
+                    Queen queen = new Queen(side);
+                    queen.setHasMoved(hasMoved);
+                    spots.put(piece.getKey(), queen);
+                    break;
+                case KING:
+                    King king = new King(side);
+                    king.setHasMoved(hasMoved);
+                    spots.put(piece.getKey(), king);
+                    break;
+            }
+        }
     }
 
     public void init() {
@@ -68,14 +115,18 @@ public class ChessBoard {
 
         spots.put(new Position(0, KING_SPOT).toString(), new King(ChessGame.Side.WHITE));
         spots.put(new Position(BOARD_DIM - 1, KING_SPOT).toString(),
-                new Knight(ChessGame.Side.BLACK));
+                new King(ChessGame.Side.BLACK));
 
 
     }
 
-    // TODO: write movePiece() function
     public ChessPiece movePiece(Position current, Position dest) throws InvalidMoveException {
         ChessPiece piece = getPieceAt(current);
+
+        if (piece == null) {
+            throw new InvalidMoveException("No piece at position.");
+        }
+
         if (piece.canMoveTo(current, dest, this) && unobstructedPath(current, dest)) {
             if (getPieceAt(dest) != null) {
                 if (getPieceAt(dest).getSide() == piece.getSide()) {
@@ -91,6 +142,10 @@ public class ChessBoard {
                 removePiece(current);
                 addPiece(dest, piece);
             }
+
+            piece.setHasMoved(true);
+        } else {
+            throw new InvalidMoveException("Illegal Move");
         }
 
         return null;
@@ -104,7 +159,7 @@ public class ChessBoard {
     }
 
     private boolean unobstructedPath(Position current, Position dest) {
-        if (getPieceAt(current).getType() == KNIGHT) {
+        if (getPieceAt(current).getType() == KNIGHT || getPieceAt(current).getType() == KING) {
             return true;
         }
 
@@ -114,13 +169,12 @@ public class ChessBoard {
         int oldCol = current.getCol();
 
         int steps = Math.max(Math.abs(newRow - oldRow), Math.abs(newCol - oldCol));
-        int rowStep = newRow - oldRow / steps;
-        int colStep = newCol - oldCol / steps;
+        int rowStep = (newRow - oldRow) / steps;
+        int colStep = (newCol - oldCol) / steps;
         int startRow = oldRow + rowStep;
         int startCol = oldCol + colStep;
 
-        //TODO: refactor this into ChessBoard class, decoupling ChessBoard and ChessPiece
-        while (startRow != newRow && startCol != newCol) {
+        while (startRow != newRow || startCol != newCol) {
             if (getPieceAt(new Position(startRow, startCol)) != null) {
                 return false;
             }
@@ -130,16 +184,76 @@ public class ChessBoard {
         return true;
     }
 
-    private void removePiece(Position position) {
+    public void removePiece(Position position) {
         spots.remove(position.toString());
     }
 
-    private void addPiece(Position position, ChessPiece piece) {
+    public void addPiece(Position position, ChessPiece piece) {
         spots.put(position.toString(), piece);
     }
 
     public ChessPiece getPieceAt(Position position) {
         return spots.get(position.toString());
+    }
+
+    public boolean checkForKingCheck(ChessGame.Side side) {
+        String position = getKingPositionString(side);
+        return checkCheck(side, position);
+    }
+
+    private String getKingPositionString(ChessGame.Side side) {
+        String position = "";
+        for (String key : spots.keySet()) {
+            if (spots.get(key).getSide() == side && spots.get(key).getType() == KING) {
+                position = key;
+            }
+        }
+        return position;
+    }
+
+    private Map<String, ChessPiece> getPiecesChecking(ChessGame.Side side) {
+        String kingPosition = getKingPositionString(side);
+        Position kingPositionObject = ChessGame.parseString(kingPosition);
+        Map<String, ChessPiece> piecesChecking = new HashMap<>();
+
+        for (String key : spots.keySet()) {
+            ChessPiece piece = spots.get(key);
+            Position piecePosition = ChessGame.parseString(key);
+            if (key != kingPosition && piece.getSide() != side) {
+                if (piece.canMoveTo(kingPositionObject, piecePosition, this) && unobstructedPath(kingPositionObject, piecePosition)) {
+                    piecesChecking.put(key, piece);
+                }
+            }
+        }
+
+        return piecesChecking;
+    }
+
+    // check mate happens when you can't get out of check. That is, for every possible move, you will
+    // still be in check.
+    public boolean checkForMate(ChessGame.Side side) {
+        String kingPosition = getKingPositionString(side);
+        Map<String, ChessPiece> piecesChecking = getPiecesChecking(side);
+
+        // check that the king cannot move to any space
+
+        return false;
+    }
+
+
+    public boolean checkCheck(ChessGame.Side side, String position) {
+        Position checkPosition = ChessGame.parseString(position);
+        for (String key : spots.keySet()) {
+            ChessPiece piece = spots.get(key);
+            Position piecePosition = ChessGame.parseString(key);
+            if (key != position && piece.getSide() != side) {
+                if (piece.canMoveTo(checkPosition, piecePosition, this) && unobstructedPath(checkPosition, piecePosition)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public Map<String, ChessPiece> getSpots() {

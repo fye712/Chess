@@ -13,6 +13,16 @@ public abstract class ChessPiece {
     private Type type;
     private ChessGame.Side side;
 
+    public boolean isHasMoved() {
+        return hasMoved;
+    }
+
+    public void setHasMoved(boolean hasMoved) {
+        this.hasMoved = hasMoved;
+    }
+
+    private boolean hasMoved;
+
     public ChessPiece() {
 
     }
@@ -20,17 +30,10 @@ public abstract class ChessPiece {
     public ChessPiece(Type type, ChessGame.Side side) {
         this.type = type;
         this.side = side;
+        this.hasMoved = false;
     }
 
-    public abstract boolean canMoveTo(Position current, Position dest, ChessBoard board);
-
-    public boolean isOccupiedByTeam(Position dest, ChessBoard board) {
-        if (board.getPieceAt(dest) != null) {
-            if (board.getPieceAt(dest).getSide() == this.getSide()) {
-                return true;
-            }
-        }
-
+    public boolean canMoveTo(Position current, Position dest, ChessBoard board) {
         return false;
     }
 

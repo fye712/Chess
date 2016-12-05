@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -93,12 +94,32 @@ public class ExampleInstrumentedTest {
     public void addChessGame() throws Exception {
         final CountDownLatch writeSignal = new CountDownLatch(1);
         ChessGame chessGame = new ChessGame(userOneKey, userTwoKey);
-        chessGame.init();
-        chessGame.addMove(new GameMove(ChessGame.Side.WHITE, "e4"));
-        chessGame.addMove(new GameMove(ChessGame.Side.BLACK, "e5"));
+        // chessGame.init();
+        // chessGame.addMove(new GameMove(ChessGame.Side.WHITE, "e4"));
+        // chessGame.addMove(new GameMove(ChessGame.Side.BLACK, "e5"));
 
         String firstGameKey = combinedChatKey + 1;
         gamesRef.child(firstGameKey).setValue(chessGame).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                writeSignal.countDown();
+            }
+        });
+
+        writeSignal.await(10, TimeUnit.SECONDS);
+    }
+
+    @Test
+    public void btwobfour() throws Exception {
+        final CountDownLatch writeSignal = new CountDownLatch(1);
+        ChessGame chessGame = new ChessGame("b2", "b4");
+        chessGame.init();
+        chessGame.doCommand(ChessGame.Side.WHITE, "b2", "b4");
+
+        String firstGameKey = "b2b4";
+        ArrayList<GameMove> moves = new ArrayList<>();
+        moves.add(new GameMove(ChessGame.Side.WHITE, new Position(1, 1).toString(), new Position(3, 1).toString()));
+        gamesRef.child(firstGameKey).setValue(new GameMove(ChessGame.Side.WHITE, new Position(1, 1).toString(), new Position(3, 1).toString())).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 writeSignal.countDown();

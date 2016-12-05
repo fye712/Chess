@@ -2,23 +2,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="me.franklinye.chess.activity.ChatFragment">
+    tools:context="me.franklinye.chess.activity.ChatFragment"
+    android:background="#36454f">
 
-    <ListView
-        android:id="@+id/chatListView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/chat_recycler"
         android:layout_above="@+id/form"
-        android:divider="@null"
-        android:dividerHeight="0dp"
-        android:paddingBottom="10dp"
-        android:text="@string/app_name" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="12dp"
+        android:background="#36454f"/>
 
     <LinearLayout
         android:id="@+id/form"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:background="#91f1f1f1"
         android:orientation="horizontal"
@@ -26,8 +28,8 @@
 
 
         <EditText
-            android:id="@+id/messageEditText"
-            android:layout_width="252dp"
+            android:id="@+id/message_form"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
@@ -38,13 +40,14 @@
             android:maxHeight="80dp" />
 
         <ImageButton
-            android:id="@+id/sendMessageButton"
+            android:id="@+id/send_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:background="@android:drawable/ic_menu_send"
-            android:text="d" />
+            android:text="d"
+            android:layout_gravity="center"/>
     </LinearLayout>
 
 </RelativeLayout>

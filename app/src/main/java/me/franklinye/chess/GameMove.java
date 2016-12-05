@@ -7,22 +7,29 @@ package me.franklinye.chess;
 public class GameMove {
 
     private ChessGame.Side side;
-    private String move;
+    private String from;
+    private String to;
 
     public GameMove() {
 
     }
 
-    public GameMove(ChessGame.Side side, String move) {
+    public GameMove(ChessGame.Side side, String from, String to) {
         this.side = side;
-        this.move = move;
+        this.from = from;
+        this.to = to;
     }
 
     public ChessGame.Side getSide() {
         return side;
     }
 
-    public String getMove() {
-        return move;
+    public String getFrom() {
+        return from;
     }
+
+    public String getTo() {
+        return to;
+    }
+
 }

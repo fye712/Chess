@@ -5,8 +5,13 @@
     tools:context="me.franklinye.chess.activity.DirectoryFragment">
 
     <android.support.v7.widget.RecyclerView
+        android:id="@+id/directory"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        ></android.support.v7.widget.RecyclerView>
+        android:scrollbars="vertical"
+        android:padding="10dp"
+        android:layout_margin="5dp"
+        android:background="#36454f"
+        />
 
 </FrameLayout>

@@ -14,6 +14,7 @@ public class User {
     private int ties;
     private int rating;
     private boolean matchmaking;
+    private String uid;
 
     public User() {
 
@@ -27,6 +28,7 @@ public class User {
         ties = 0;
         rating = 0;
         matchmaking = false;
+        this.uid = user.getUid();
     }
 
     public String getName() {
@@ -35,6 +37,10 @@ public class User {
 
     public String getPhotoUrl() {
         return photoUrl;
+    }
+
+    public String getUid() {
+        return uid;
     }
 
     public int getWins() {

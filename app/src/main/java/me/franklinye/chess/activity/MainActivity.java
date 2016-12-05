@@ -17,11 +17,16 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import me.franklinye.chess.R;
 import me.franklinye.chess.User;
@@ -34,8 +39,15 @@ public class MainActivity extends AppCompatActivity {
     FirebaseDatabase mDatabase = FirebaseDatabase.getInstance();
     DatabaseReference mUsersRef = mDatabase.getReference("users");
 
+    private ListView mDrawerList;
+    private ArrayAdapter<String> mAdapter;
+
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
+
+    private String[] mNavArray = new String[] { "Username", "wins", "losses", "ties" };
+
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,43 +55,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                NotificationCompat.Builder mBuilder =
-                        new NotificationCompat.Builder(getApplicationContext())
-                                .setSmallIcon(android.R.drawable.stat_notify_sync)
-                                .setContentTitle("My notification")
-                                .setContentText("Hello World!");
-                // Creates an explicit intent for an Activity in your app
-                Intent resultIntent = new Intent(getApplicationContext(), ChatActivity.class);
-
-                // The stack builder object will contain an artificial back stack for the
-                // started Activity.
-                // This ensures that navigating backward from the Activity leads out of
-                // your application to the Home screen.
-                TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-                // Adds the back stack for the Intent (but not the Intent itself)
-                stackBuilder.addParentStack(ChatActivity.class);
-                // Adds the Intent that starts the Activity to the top of the stack
-                stackBuilder.addNextIntent(resultIntent);
-                PendingIntent resultPendingIntent =
-                        stackBuilder.getPendingIntent(
-                                0,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                        );
-                mBuilder.setContentIntent(resultPendingIntent);
-                NotificationManager mNotificationManager =
-                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                // mId allows you to update the notification later on.
-                mNotificationManager.notify(mId, mBuilder.build());
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerToggle = new ActionBarDrawerToggle(
@@ -113,8 +88,24 @@ public class MainActivity extends AppCompatActivity {
         mUser = FirebaseAuth.getInstance().getCurrentUser();
         if (mUser != null) {
             // User is signed in
-            User user = new User(mUser);
-            mUsersRef.child(mUser.getUid()).setValue(user);
+            ValueEventListener userListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.getValue() == null) {
+                        User user = new User(mUser);
+                        mUsersRef.child(mUser.getUid()).setValue(user);
+                        HelpFragment f = new HelpFragment();
+                        f.show(getSupportFragmentManager(), "HELP");
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            };
+            mUsersRef.child(mUser.getUid()).addListenerForSingleValueEvent(userListener);
+
         } else {
             // User is signed out
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
@@ -128,15 +119,50 @@ public class MainActivity extends AppCompatActivity {
                 mUser = firebaseAuth.getCurrentUser();
                 if (mUser != null) {
                     // User is signed in
+                    if (mUsersRef.child(mUser.getUid()) == null) {
+                        User user = new User(mUser);
+                        mUsersRef.child(mUser.getUid()).setValue(user);
+                    }
                 } else {
                     // User is signed out
                     Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                     startActivity(intent);
                     finish();
                 }
-                // ...
             }
         };
+
+        mDrawerList = (ListView)findViewById(R.id.left_drawer);
+        if (mUser != null) {
+            addDrawerItems();
+        }
+
+    }
+
+    private void addDrawerItems() {
+        ValueEventListener userListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String userString = dataSnapshot.child("name").getValue(String.class);
+                String winsString = "Wins: " + dataSnapshot.child("wins").getValue(int.class).toString();
+                String tiesString = "Ties: " + dataSnapshot.child("ties").getValue(int.class).toString();
+                String lossesString = "Losses: " + dataSnapshot.child("losses").getValue(int.class).toString();
+                mNavArray[0] = userString;
+                mNavArray[1] = winsString;
+                mNavArray[2] = tiesString;
+                mNavArray[3] = lossesString;
+                mAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, mNavArray);
+                mDrawerList.setAdapter(mAdapter);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        mUsersRef.child(mUser.getUid()).addValueEventListener(userListener);
+        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mNavArray);
+        mDrawerList.setAdapter(mAdapter);
     }
 
     @Override
@@ -154,9 +180,15 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_help) {
+            HelpFragment f = new HelpFragment();
+            f.show(getSupportFragmentManager(), "HELP");
             return true;
-        } else if (id == R.id.action_search) {
+        } else if (id == R.id.action_signout) {
+            FirebaseAuth.getInstance().signOut();
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(intent);
+            finish();
             return true;
         }
 
