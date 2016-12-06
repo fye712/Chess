@@ -1,8 +1,8 @@
 package me.franklinye.chess;
 
-import com.google.firebase.database.IgnoreExtraProperties;
 
 /**
+ * This class represents a ChatMessage to be stored in Firebase
  * Created by franklinye on 11/27/16.
  */
 

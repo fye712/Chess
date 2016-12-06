@@ -1,6 +1,7 @@
-package me.franklinye.chess;
+package me.franklinye.chess.game;
 
 /**
+ * Abstract ChessPiece base class.
  * Created by franklinye on 11/23/16.
  */
 
@@ -33,6 +34,13 @@ public abstract class ChessPiece {
         this.hasMoved = false;
     }
 
+    /**
+     * This abstract method checks to see if the piece can move from one position to the next.
+     * @param current starting position
+     * @param dest ending position
+     * @param board the board
+     * @return boolean true if piece can move
+     */
     public boolean canMoveTo(Position current, Position dest, ChessBoard board) {
         return false;
     }

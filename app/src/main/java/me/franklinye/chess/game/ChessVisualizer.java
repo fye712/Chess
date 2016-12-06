@@ -1,10 +1,7 @@
-package me.franklinye.chess;
-
-import android.content.res.Resources;
-
-import java.util.Map;
+package me.franklinye.chess.game;
 
 /**
+ * This class provides a unicode visualization of the chess board
  * Created by franklinye on 12/4/16.
  */
 
@@ -74,7 +71,7 @@ public class ChessVisualizer {
 
     private static String squareDecider(int row, char col) {
         if ((row + col) % 2 == 1) {
-            return "⚝";
+            return "⚝"; // we use this symbol because it is the same size as the chess symbols.
         } else {
             return "⚝";
         }

@@ -3,10 +3,13 @@ package me.franklinye.chess;
 import org.junit.Before;
 import org.junit.Test;
 
-import me.franklinye.chess.pieces.Pawn;
+import me.franklinye.chess.game.ChessBoard;
+import me.franklinye.chess.game.ChessGame;
+import me.franklinye.chess.game.ChessPiece;
+import me.franklinye.chess.game.Position;
 
-import static me.franklinye.chess.ChessPiece.Type.KING;
-import static me.franklinye.chess.ChessPiece.Type.ROOK;
+import static me.franklinye.chess.game.ChessPiece.Type.KING;
+import static me.franklinye.chess.game.ChessPiece.Type.ROOK;
 import static org.junit.Assert.*;
 
 /**

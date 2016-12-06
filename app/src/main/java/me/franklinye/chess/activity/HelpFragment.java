@@ -15,7 +15,8 @@ import android.widget.TextView;
 import me.franklinye.chess.R;
 
 /**
- * A simple {@link Fragment} subclass.
+ * This DialogFragment launches an AlertDialog with the rules and commands of the game.
+ * A simple {@link DialogFragment} subclass.
  */
 public class HelpFragment extends DialogFragment {
 

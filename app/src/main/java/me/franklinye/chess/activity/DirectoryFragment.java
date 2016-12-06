@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -25,12 +26,16 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import me.franklinye.chess.ChatMessage;
 import me.franklinye.chess.R;
 import me.franklinye.chess.User;
 
 
 /**
+ * This fragment is for the MainActivity, giving a view of all users and a preview of the last
+ * message sent between the current user and that user.
  * A simple {@link Fragment} subclass.
  */
 public class DirectoryFragment extends Fragment {
@@ -58,30 +63,78 @@ public class DirectoryFragment extends Fragment {
         mDirectoryRecycler = (RecyclerView) rootView.findViewById(R.id.directory);
         mLinearLayoutManager = new LinearLayoutManager(getContext());
         mDirectoryRecycler.setLayoutManager(mLinearLayoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mDirectoryRecycler
+                .getContext(), mLinearLayoutManager.getOrientation());
+        mDirectoryRecycler.addItemDecoration(dividerItemDecoration);
 
 
         return rootView;
     }
 
+    /**
+     * the onStart method attaches a FirebaseRecyclerAdapter to the RecyclerView.
+     */
     @Override
     public void onStart() {
         super.onStart();
         mUser = FirebaseAuth.getInstance().getCurrentUser();
         mUserData = mUsersRef.child(mUser.getUid());
-        mDirectoryAdapter = new FirebaseRecyclerAdapter<User, UserHolder>(User.class, R.layout.list_item_user,
-                UserHolder.class, mUsersRef) {
+        mDirectoryAdapter = new FirebaseRecyclerAdapter<User, UserHolder>(User.class,
+                R.layout.list_item_user, UserHolder.class, mUsersRef) {
 
-            // TODO: add chat preview
             @Override
-            protected void populateViewHolder(UserHolder viewHolder, final User model, int position) {
+            protected void populateViewHolder(final UserHolder viewHolder, final User model, int position) {
                 if (model.getUid().matches(mUser.getUid())) {
                     ViewGroup.LayoutParams params = viewHolder.itemView.getLayoutParams();
                     params.height = 0;
                     viewHolder.itemView.setLayoutParams(params);
                 }
 
-                viewHolder.bindUser(model);
+                // this ValueEventListener fetches the last message sent in a chat
+                final ValueEventListener previewTextListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        List<ChatMessage> messages = new ArrayList<>();
+                        for (DataSnapshot message : dataSnapshot.getChildren()) {
+                            messages.add(message.getValue(ChatMessage.class));
+                        }
+                        String previewMessage = "";
+                        if (messages.isEmpty()) {
+                            previewMessage = "Start chatting!";
+                        } else {
+                            previewMessage = messages.get(messages.size() - 1).message;
+                        }
 
+                        viewHolder.bindUser(model, previewMessage);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                };
+
+                // this ValueEventListener gets the chatKey for a user
+                ValueEventListener chatKeyListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        String chatKey = dataSnapshot.getValue(String.class);
+                        if (chatKey == null) {
+                            viewHolder.bindUser(model, "Start chatting!");
+                        } else {
+                            mChatsRef.child(chatKey).child("messages").addListenerForSingleValueEvent(previewTextListener);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                };
+
+                mUserData.child("chat_keys").child(model.getUid()).addListenerForSingleValueEvent(chatKeyListener);
+
+                // onClickListener for an item in the RecyclerView
                 viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -93,7 +146,8 @@ public class DirectoryFragment extends Fragment {
                                 if (chatKey == null) {
                                     chatKey = mChatsRef.push().getKey();
                                     mUserData.child("chat_keys").child(model.getUid()).setValue(chatKey);
-                                    mUsersRef.child(model.getUid()).child("chat_keys").child(mUser.getUid()).setValue(chatKey);
+                                    mUsersRef.child(model.getUid()).child("chat_keys")
+                                            .child(mUser.getUid()).setValue(chatKey);
                                 }
                                 Intent intent = new Intent(getContext(), ChatActivity.class);
                                 intent.putExtra("chatKey", chatKey);
@@ -125,6 +179,9 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
+    /**
+     * ViewHolder for a user in the DirectoryFragment RecyclerView
+     */
     public static class UserHolder extends RecyclerView.ViewHolder {
         private ImageView mUserImage;
         private TextView mUserName;
@@ -140,9 +197,10 @@ public class DirectoryFragment extends Fragment {
             mChatPreview = (TextView) v.findViewById(R.id.chat_preview);
         }
 
-        public void bindUser(User user) {
+        public void bindUser(User user, String preview) {
             Picasso.with(mUserImage.getContext()).load(user.getPhotoUrl()).into(mUserImage);
             mUserName.setText(user.getName());
+            mChatPreview.setText(preview);
         }
 
     }

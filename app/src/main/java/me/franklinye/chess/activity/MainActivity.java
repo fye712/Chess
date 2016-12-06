@@ -33,9 +33,7 @@ import me.franklinye.chess.User;
 
 public class MainActivity extends AppCompatActivity {
 
-    private int mId = 1337;
     private FirebaseUser mUser;
-    private FirebaseAuth.AuthStateListener mAuthListener;
     FirebaseDatabase mDatabase = FirebaseDatabase.getInstance();
     DatabaseReference mUsersRef = mDatabase.getReference("users");
 
@@ -47,8 +45,12 @@ public class MainActivity extends AppCompatActivity {
 
     private String[] mNavArray = new String[] { "Username", "wins", "losses", "ties" };
 
-    private boolean mTwoPane;
-
+    /**
+     * This onCreate method sets up the Activity and navigation drawer. It also checks to see if
+     * the user is authenticated. If not, it boots them out to the Login screen.
+     * NavigationDrawer code taken from Google/Android Developers documentation.
+     * @param savedInstanceState savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,25 +115,6 @@ public class MainActivity extends AppCompatActivity {
             finish();
         }
 
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                mUser = firebaseAuth.getCurrentUser();
-                if (mUser != null) {
-                    // User is signed in
-                    if (mUsersRef.child(mUser.getUid()) == null) {
-                        User user = new User(mUser);
-                        mUsersRef.child(mUser.getUid()).setValue(user);
-                    }
-                } else {
-                    // User is signed out
-                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
-            }
-        };
-
         mDrawerList = (ListView)findViewById(R.id.left_drawer);
         if (mUser != null) {
             addDrawerItems();
@@ -139,6 +122,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * This method grabs information from the users data stored in Firebase and adds it to the
+     * drawer.
+     */
     private void addDrawerItems() {
         ValueEventListener userListener = new ValueEventListener() {
             @Override
@@ -172,6 +159,11 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * This method handles the menu items
+     * @param item item
+     * @return boolean
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will

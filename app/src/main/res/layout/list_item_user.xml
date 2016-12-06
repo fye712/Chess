@@ -4,7 +4,9 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="3dp">
+    android:paddingBottom="3dp"
+    android:background="?android:attr/selectableItemBackground"
+    android:paddingTop="3dp">
     <RelativeLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -37,16 +39,17 @@
         >
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:id="@+id/user_name"
-            android:gravity="center_vertical"
-            android:textColor="#ffffff"
+            android:textColor="#36454f"
             android:textSize="20sp"/>
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/chat_preview"/>
+            android:textColor="#36454f"
+            android:id="@+id/chat_preview"
+            android:maxLines="1"
+            android:textStyle="italic"/>
     </LinearLayout>
 
 </LinearLayout>

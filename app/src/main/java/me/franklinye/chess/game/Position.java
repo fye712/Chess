@@ -1,6 +1,7 @@
-package me.franklinye.chess;
+package me.franklinye.chess.game;
 
 /**
+ * This class represents a position or a spot on the Chess Board
  * Created by franklinye on 11/29/16.
  */
 

@@ -1,13 +1,14 @@
-package me.franklinye.chess.pieces;
+package me.franklinye.chess.game.pieces;
 
-import me.franklinye.chess.ChessBoard;
-import me.franklinye.chess.ChessGame;
-import me.franklinye.chess.ChessPiece;
-import me.franklinye.chess.Position;
+import me.franklinye.chess.game.ChessBoard;
+import me.franklinye.chess.game.ChessGame;
+import me.franklinye.chess.game.ChessPiece;
+import me.franklinye.chess.game.Position;
 
-import static me.franklinye.chess.ChessGame.Side.WHITE;
+import static me.franklinye.chess.game.ChessGame.Side.WHITE;
 
 /**
+ * This class represents a pawn piece
  * Created by franklinye on 11/28/16.
  */
 

@@ -29,6 +29,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import me.franklinye.chess.R;
 
 /**
+ * This activity facilitates Firebase authentication with Google.
  * Created by franklinye on 11/27/16.
  * https://firebase.google.com/docs/auth/android/google-signin
  */
@@ -140,7 +141,7 @@ public class LoginActivity extends AppCompatActivity implements
             // Google Sign In was successful, authenticate with Firebase
             GoogleSignInAccount account = result.getSignInAccount();
             firebaseAuthWithGoogle(account);
-            updateUI(true);
+            // updateUI(true);
         } else {
             // Signed out, show unauthenticated UI.
             updateUI(false);
@@ -167,6 +168,9 @@ public class LoginActivity extends AppCompatActivity implements
                             Log.w(TAG, "signInWithCredential", task.getException());
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
+                        } else {
+                            hideProgressDialog();
+                            updateUI(true);
                         }
                         // [START_EXCLUDE]
                         hideProgressDialog();
@@ -182,7 +186,7 @@ public class LoginActivity extends AppCompatActivity implements
             mProgressDialog.setIndeterminate(true);
         }
 
-        // mProgressDialog.show();
+         mProgressDialog.show();
     }
 
     private void hideProgressDialog() {

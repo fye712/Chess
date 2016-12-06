@@ -6,12 +6,14 @@ import android.support.v7.widget.Toolbar;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import me.franklinye.chess.R;
 
+/**
+ * This activity is the screen in which you are chatting with another user.
+ */
 public class ChatActivity extends AppCompatActivity {
 
     private FirebaseDatabase mDatabase = FirebaseDatabase.getInstance();
@@ -25,7 +27,7 @@ public class ChatActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
+        // listener to set the title of the action bar
         ValueEventListener userNameListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -41,6 +43,7 @@ public class ChatActivity extends AppCompatActivity {
         };
         mDatabase.getReference("users").addListenerForSingleValueEvent(userNameListener);
 
+        // putting arguments in the fragment
         if (savedInstanceState == null) {
             Bundle arguments = new Bundle();
             arguments.putString("chatKey", getIntent().getExtras().getString("chatKey"));

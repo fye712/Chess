@@ -3,6 +3,7 @@ package me.franklinye.chess;
 import com.google.firebase.auth.FirebaseUser;
 
 /**
+ * This class represents a user to be stored in Firebase
  * Created by franklinye on 11/27/16.
  */
 

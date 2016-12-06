@@ -1,11 +1,12 @@
-package me.franklinye.chess.pieces;
+package me.franklinye.chess.game.pieces;
 
-import me.franklinye.chess.ChessBoard;
-import me.franklinye.chess.ChessGame;
-import me.franklinye.chess.ChessPiece;
-import me.franklinye.chess.Position;
+import me.franklinye.chess.game.ChessBoard;
+import me.franklinye.chess.game.ChessGame;
+import me.franklinye.chess.game.ChessPiece;
+import me.franklinye.chess.game.Position;
 
 /**
+ * This class represents a queen piece.
  * Created by franklinye on 11/29/16.
  */
 
@@ -23,7 +24,7 @@ public class Queen extends ChessPiece {
             return true;
         }
 
-        if (Bishop.bishopMovement(current, dest, board)) {
+        if (Bishop.bishopMovement(current, dest)) {
             return true;
         }
 

@@ -1,11 +1,12 @@
-package me.franklinye.chess.pieces;
+package me.franklinye.chess.game.pieces;
 
-import me.franklinye.chess.ChessBoard;
-import me.franklinye.chess.ChessGame;
-import me.franklinye.chess.ChessPiece;
-import me.franklinye.chess.Position;
+import me.franklinye.chess.game.ChessBoard;
+import me.franklinye.chess.game.ChessGame;
+import me.franklinye.chess.game.ChessPiece;
+import me.franklinye.chess.game.Position;
 
 /**
+ * This class represents a King
  * Created by franklinye on 11/29/16.
  */
 
@@ -16,16 +17,16 @@ public class King extends ChessPiece{
     }
 
     public King() {
-
+        // required for Firebase
     }
 
     public boolean canMoveTo(Position current, Position dest, ChessBoard board) {
         int rowDif = dest.getRow() - current.getRow();
         int colDif = dest.getCol() - current.getCol();
+        // standard movement
         if ((-1 <= rowDif && rowDif <= 1) && (-1 <= colDif && colDif <= 1)) {
             return true;
-        } else if ((colDif == 2 || colDif == -2) && !isHasMoved() && rowDif == 0) {
-            // TODO: test castling
+        } else if ((colDif == 2 || colDif == -2) && !isHasMoved() && rowDif == 0) { // castling
             Position rookPosition = colDif == 2 ? new Position(current.getRow(), 7) :
                     new Position(current.getRow(), 0);
 

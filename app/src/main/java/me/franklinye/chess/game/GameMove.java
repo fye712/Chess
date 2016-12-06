@@ -1,6 +1,7 @@
-package me.franklinye.chess;
+package me.franklinye.chess.game;
 
 /**
+ * This class represents a game move, for logging purposes.
  * Created by franklinye on 11/27/16.
  */
 

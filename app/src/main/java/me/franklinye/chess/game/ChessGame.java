@@ -1,26 +1,23 @@
-package me.franklinye.chess;
+package me.franklinye.chess.game;
 
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import me.franklinye.chess.pieces.Bishop;
-import me.franklinye.chess.pieces.King;
-import me.franklinye.chess.pieces.Knight;
-import me.franklinye.chess.pieces.Pawn;
-import me.franklinye.chess.pieces.Queen;
-import me.franklinye.chess.pieces.Rook;
+import me.franklinye.chess.game.pieces.Bishop;
+import me.franklinye.chess.game.pieces.King;
+import me.franklinye.chess.game.pieces.Knight;
+import me.franklinye.chess.game.pieces.Pawn;
+import me.franklinye.chess.game.pieces.Queen;
+import me.franklinye.chess.game.pieces.Rook;
 
-import static me.franklinye.chess.ChessGame.Side.BLACK;
-import static me.franklinye.chess.ChessGame.Side.WHITE;
-import static me.franklinye.chess.ChessPiece.Type.KING;
+import static me.franklinye.chess.game.ChessGame.Side.BLACK;
+import static me.franklinye.chess.game.ChessGame.Side.WHITE;
 
 /**
+ * This class represents a Chess Game
  * Created by franklinye on 11/23/16.
  */
 
@@ -43,9 +40,13 @@ public class ChessGame {
     private String offeredStalemateBy;
 
     public ChessGame() {
-
+        // empty constructor for Firebase
     }
 
+    /**
+     * This method takes a DataSnapshot of a game stored in Firebase and produces a ChessGame object
+     * @param dataSnapshot the game stored in Firebase
+     */
     public ChessGame(DataSnapshot dataSnapshot) {
         moves = dataSnapshot.child("moves").getValue(new GenericTypeIndicator<List<GameMove>>() {
         });
@@ -108,6 +109,11 @@ public class ChessGame {
         board = new ChessBoard(dataSnapshot.child("board"));
     }
 
+    /**
+     * Constructor for ChessGame using the strings of the users.
+     * @param whiteUser white
+     * @param blackUser black
+     */
     public ChessGame(String whiteUser, String blackUser) {
         this.moves = new ArrayList<>();
         this.whiteUser = whiteUser;
@@ -119,11 +125,20 @@ public class ChessGame {
         init();
     }
 
+    /**
+     * This method initializes the board.
+     */
     public void init() {
         board = new ChessBoard();
         board.init();
     }
 
+    /**
+     * This method does a command taken from a player given as two positions.
+     * @param side Side doing the command.
+     * @param current Starting position
+     * @param dest Ending position
+     */
     public void doCommand(Side side, Position current, Position dest) {
 
         Side otherSide = side == WHITE ? BLACK : WHITE;
@@ -132,6 +147,9 @@ public class ChessGame {
         }
         ChessPiece piece = board.getPieceAt(current);
         if (piece == null || piece.getSide() != side) {
+            if (!status.startsWith("invalid")) {
+                status = "invalid move \n" + status;
+            }
             return;
         }
 
@@ -140,8 +158,9 @@ public class ChessGame {
             if (capturedPiece != null) {
                 capturedPieces.add(capturedPiece);
                 // if you capture a king you win
-                if (capturedPiece.getType() == KING) {
+                if (capturedPiece.getType() == ChessPiece.Type.KING) {
                     endGame(side);
+                    return;
                 }
             }
 
@@ -149,18 +168,29 @@ public class ChessGame {
 
             switchPlayer();
             if (board.checkForKingCheck(otherSide)) {
-                status += otherSide.name() + " is checked.";
+                status += otherSide.name() + "\n is checked.";
             }
         } catch (InvalidMoveException e) {
             e.printStackTrace();
-            return;
+            if (!status.startsWith("invalid")) {
+                status = "invalid move \n" + status;
+            }
         }
     }
 
+    /**
+     * This method gets the piece at a certain position using the String representation of a
+     * position.
+     * @param position String representation of a position
+     * @return ChessPiece at position in board
+     */
     public ChessPiece getPieceAt(String position) {
         return board.getPieceAt(parseString(position));
     }
 
+    /**
+     * This method switches the player to move and updates the status of the game.
+     */
     public void switchPlayer() {
         if (playerToMove == WHITE) {
             playerToMove = BLACK;
@@ -171,10 +201,20 @@ public class ChessGame {
         status = playerToMove.name() + " to move.";
     }
 
+    /**
+     * This helper method for doCommand(Side, Position, Position) takes the positions in as strings.
+     * @param side Side doing the command.
+     * @param currentPosition String representation of starting position
+     * @param destination String representation of ending position
+     */
     public void doCommand(Side side, String currentPosition, String destination) {
         doCommand(side, parseString(currentPosition), parseString(destination));
     }
 
+    /**
+     * This method ends the game when a player wins.
+     * @param winnerSide The side that wins.
+     */
     public void endGame(Side winnerSide) {
         if (winnerSide == WHITE) {
             winner = getWhiteUser();
@@ -183,14 +223,24 @@ public class ChessGame {
         }
 
         playerToMove = null;
+        status = winnerSide + " wins.";
     }
 
+    /**
+     * This method ends the game in a stalemate.
+     */
     public void stalemate() {
         winner = "stalemate";
         playerToMove = null;
         offeredStalemate = false;
+        status = "stalemate";
     }
 
+    /**
+     * This method parses a position's string representation.
+     * @param positionString String
+     * @return Position
+     */
     public static Position parseString(String positionString) {
         int col = positionString.charAt(0) - 'a';
         int row = Integer.parseInt(Character.toString(positionString.charAt(1))) - 1;
